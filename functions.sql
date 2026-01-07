@@ -1,10 +1,8 @@
--- Funkcja 1: Obliczanie przychodów dla zadanego okresu
--- Ta funkcja oblicza całkowity przychód, liczbę zamówień i średnią wartość zamówienia
 CREATE OR REPLACE FUNCTION calculate_revenue(start_date TIMESTAMP, end_date TIMESTAMP)
 RETURNS TABLE (
-    total_revenue DECIMAL(10,2), -- Całkowity przychód
-    total_orders INTEGER, -- Liczba zamówień
-    avg_order_value DECIMAL(10,2) -- Średnia wartość zamówienia
+    total_revenue DECIMAL(10,2), 
+    total_orders INTEGER, 
+    avg_order_value DECIMAL(10,2) 
 ) AS $$
 BEGIN
     RETURN QUERY
@@ -22,13 +20,11 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Funkcja 2: Rekomendacje produktów na podstawie historii zakupów
--- Ta funkcja zwraca rekomendowane produkty dla użytkownika na podstawie jego wcześniejszych zakupów
 CREATE OR REPLACE FUNCTION get_product_recommendations(user_id_param UUID)
 RETURNS TABLE (
-    product_id UUID, -- ID produktu
-    product_name VARCHAR(100), -- Nazwa produktu
-    similarity_score INTEGER -- Wynik podobieństwa
+    product_id UUID, 
+    product_name VARCHAR(100), 
+    similarity_score INTEGER 
 ) AS $$
 BEGIN
     RETURN QUERY
@@ -58,14 +54,12 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Funkcja 3: Obliczanie statystyk zakupowych użytkownika
--- Ta funkcja analizuje zachowania zakupowe użytkownika i zwraca różne statystyki
 CREATE OR REPLACE FUNCTION get_user_statistics(user_id_param UUID)
 RETURNS TABLE (
-    total_purchases DECIMAL(10,2), -- Suma wszystkich zakupów
-    avg_order_value DECIMAL(10,2), -- Średnia wartość zamówienia
-    favorite_product VARCHAR(100), -- Ulubiony produkt
-    purchase_frequency INTERVAL -- Częstotliwość zakupów
+    total_purchases DECIMAL(10,2), 
+    avg_order_value DECIMAL(10,2), 
+    favorite_product VARCHAR(100), 
+    purchase_frequency INTERVAL 
 ) AS $$
 BEGIN
     RETURN QUERY
@@ -99,22 +93,19 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Funkcja 4: Aktualizacja stanu magazynowego i obsługa zamówień oczekujących
--- Ta funkcja zarządza stanem magazynowym produktów i obsługuje zamówienia oczekujące
 CREATE OR REPLACE FUNCTION process_inventory_update(
-    product_id_param UUID, -- ID produktu
-    quantity_change INTEGER, -- Zmiana ilości
-    allow_backorder BOOLEAN DEFAULT false -- Czy zezwolić na zamówienia oczekujące
+    product_id_param UUID, 
+    quantity_change INTEGER, 
+    allow_backorder BOOLEAN DEFAULT false 
 ) RETURNS TABLE (
-    status VARCHAR(50), -- Status operacji
-    message TEXT, -- Wiadomość zwrotna
-    new_quantity INTEGER -- Nowa ilość
+    status VARCHAR(50), 
+    message TEXT, 
+    new_quantity INTEGER 
 ) AS $$
 DECLARE
     current_stock INTEGER;
     new_stock INTEGER;
 BEGIN
-    -- Pobranie aktualnego stanu
     SELECT stock_quantity INTO current_stock
     FROM Products
     WHERE product_id = product_id_param;
@@ -137,12 +128,10 @@ BEGIN
         RETURN;
     END IF;
 
-    -- Aktualizacja stanu
     UPDATE Products
     SET stock_quantity = new_stock
     WHERE product_id = product_id_param;
 
-    -- Zwrócenie wyniku
     RETURN QUERY SELECT 
         CASE 
             WHEN new_stock >= 0 THEN 'success'::VARCHAR(50)
@@ -154,4 +143,5 @@ BEGIN
         END,
         new_stock::INTEGER;
 END;
+
 $$ LANGUAGE plpgsql; 
